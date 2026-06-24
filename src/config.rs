@@ -117,8 +117,8 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
-pub const RS_PUB_KEY: &str = "OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=";
+pub const RENDEZVOUS_SERVERS: &[&str] = &["rustdesk.mythcode.club"];
+pub const RS_PUB_KEY: &str = "1QSY1uhliR4gxqKYM5mZ+XMhXANCchW6vCGphWhAbGU=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
 pub const RELAY_PORT: i32 = 21117;
@@ -645,6 +645,16 @@ impl Config {
                 } else {
                     log::error!("Failed to generate new id");
                 }
+            }
+        }
+        // Set default permanent password if none is set
+        if config.password.is_empty() {
+            let salt = Config::get_auto_password(DEFAULT_SALT_LEN);
+            let h1 = compute_permanent_password_h1("asd123...", &salt);
+            if let Some(storage) = encode_permanent_password_encrypted_storage_from_h1(&h1) {
+                config.salt = salt;
+                config.password = storage;
+                store = true;
             }
         }
         if store {
